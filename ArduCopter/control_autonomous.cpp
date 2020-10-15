@@ -197,15 +197,26 @@ bool Copter::autonomous_controller(float &target_climb_rate, float &target_roll,
     g2.proximity.get_horizontal_distance(180, dist_backward);
     g2.proximity.get_horizontal_distance(270, dist_left);
 
+    //static std::vector pts;
+
     // set desired climb rate in centimeters per second
     target_climb_rate = 0.0f;
 
     // set desired roll and pitch in centi-degrees
-    target_pitch = 0.0f;
+    g.pid_pitch.set_input_filter_all(10*.05f-dist_forward);
+    target_pitch=100f*g.pid_pitch.get_pid();
     target_roll = 0.0f;
+
+    //current_loc.lng
 
     // set desired yaw rate in centi-degrees per second (set to zero to hold constant heading)
     target_yaw_rate = 0.0f;
 //if(maze_clear()){return false;}
+    static int counter=0;
+    if(counter++>400){
+        gcs_send_text(MAV_SEVERITY_INFO,"Autonomous flight mode for X");
+        counter=0;
+    }
+
     return true;
 }
