@@ -216,10 +216,10 @@ bool Copter::autonomous_controller(float &target_climb_rate, float &target_roll,
         if (data[i]<crashlim){
             float mult=(i==1||i==0)?100.0f:-100.0f;
             if (i==0||i==2){
-                g.pid_pitch.set_input_filter_all(10*(0.3f)-dist_forward);
+                g.pid_pitch.set_input_filter_all(10*(0.3f)-data[i]);
                 target_pitch=mult*g.pid_pitch.get_pid();
             }else{
-                g.pid_roll.set_input_filter_all(10*(0.3f)-dist_right);
+                g.pid_roll.set_input_filter_all(10*(0.3f)-data[i]);
                 target_roll=mult*g.pid_roll.get_pid();
             }
         }
@@ -254,10 +254,10 @@ bool Copter::autonomous_controller(float &target_climb_rate, float &target_roll,
         }
         float mult=(mstate==1||mstate==0)?100.0f:-100.0f;
         if (mstate==0||mstate==2){
-            g.pid_pitch.set_input_filter_all(10*(0.5f)-dist_forward);
+            g.pid_pitch.set_input_filter_all(10*(0.5f)-data[mstate]);
             target_pitch=mult*g.pid_pitch.get_pid();
         }else{
-            g.pid_roll.set_input_filter_all(10*(0.5f)-dist_right);
+            g.pid_roll.set_input_filter_all(10*(0.5f)-data[mstate]);
             target_roll=mult*g.pid_roll.get_pid();
         }
     }
