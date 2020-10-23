@@ -254,10 +254,10 @@ bool Copter::autonomous_controller(float &target_climb_rate, float &target_roll,
         }
         float mult=(mstate==1||mstate==0)?100.0f:-100.0f;
         if (mstate==0||mstate==2){
-            g.pid_pitch.set_input_filter_all(10*(0.3f)-dist_forward);
+            g.pid_pitch.set_input_filter_all(10*(0.5f)-dist_forward);
             target_pitch=mult*g.pid_pitch.get_pid();
         }else{
-            g.pid_roll.set_input_filter_all(10*(0.3f)-dist_right);
+            g.pid_roll.set_input_filter_all(10*(0.5f)-dist_right);
             target_roll=mult*g.pid_roll.get_pid();
         }
     }
