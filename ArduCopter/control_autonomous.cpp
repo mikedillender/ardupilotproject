@@ -200,8 +200,8 @@ bool Copter::autonomous_controller(float &target_climb_rate, float &target_roll,
     g2.proximity.get_horizontal_distance(180, dist_backward);
     g2.proximity.get_horizontal_distance(270, dist_left);
 
-    float dists [4]={dist_forward,dist_right,dist_backward,dist_left};
-    /*for (int i = 0; i < 4; i++) {
+    float data [4]={dist_forward,dist_right,dist_backward,dist_left};
+/*for (int i = 0; i < 4; i++) {
         float orient=
     }*/
 
