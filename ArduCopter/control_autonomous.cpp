@@ -201,9 +201,6 @@ bool Copter::autonomous_controller(float &target_climb_rate, float &target_roll,
     g2.proximity.get_horizontal_distance(270, dist_left);
 
     float data [4]={dist_forward,dist_right,dist_backward,dist_left};
-/*for (int i = 0; i < 4; i++) {
-        float orient=
-    }*/
 
 
     // set desired climb rate in centimeters per second
@@ -224,13 +221,6 @@ bool Copter::autonomous_controller(float &target_climb_rate, float &target_roll,
             }
         }
     }
-    /*
-    g.pid_pitch.set_input_filter_all(10*(0.5f)-dist_forward);
-    target_pitch=100.0f*g.pid_pitch.get_pid();
-    //TODO REDO THIS SO IT ONLY CONTROLS WHEN VERY CLOSE
-    g.pid_roll.set_input_filter_all(10*(0.5f)-dist_right);
-    target_roll=100.0f*g.pid_roll.get_pid();
-     */
 
     bool runningmaze= false;
     float limit=10*(0.5f);
