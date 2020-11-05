@@ -191,7 +191,7 @@ bool Copter::autonomous_controller(float &target_climb_rate, float &target_roll,
     //static std::vector pts;
     // get downward facing sensor reading in meters
     static int mstate=0;
-    float rangefinder_alt = (float)rangefinder_state.alt_cm / 100.0f;
+    //static int switches=0;
 
     // get horizontal sensor readings in meters
     float dist_forward, dist_right, dist_backward, dist_left;
@@ -200,7 +200,10 @@ bool Copter::autonomous_controller(float &target_climb_rate, float &target_roll,
     g2.proximity.get_horizontal_distance(180, dist_backward);
     g2.proximity.get_horizontal_distance(270, dist_left);
 
-    float data [4]={dist_forward,dist_right,dist_backward,dist_left};
+    float dists [4]={dist_forward,dist_right,dist_backward,dist_left};
+    /*for (int i = 0; i < 4; i++) {
+        float orient=
+    }*/
 
 
     // set desired climb rate in centimeters per second
@@ -208,48 +211,76 @@ bool Copter::autonomous_controller(float &target_climb_rate, float &target_roll,
     target_pitch=0;
     target_roll=0;
     // set desired roll and pitch in centi-degrees
-    float crashlim=10*(0.25f);
+    float crashlim=10*(0.3f);
     for (int i = 0; i < 4; i++) {
-        if (data[i]<crashlim){
-            float mult=(i==1||i==0)?100.0f:-100.0f;
+        if (dists[i]<crashlim){
+            float mult=(i==3||i==0)?100.0f:-100.0f;
             if (i==0||i==2){
-                g.pid_pitch.set_input_filter_all(10*(0.3f)-data[i]);
+                g.pid_pitch.set_input_filter_all(crashlim-dists[i]);
                 target_pitch=mult*g.pid_pitch.get_pid();
             }else{
-                g.pid_roll.set_input_filter_all(10*(0.3f)-data[i]);
+                g.pid_roll.set_input_filter_all(crashlim-dists[i]);
                 target_roll=mult*g.pid_roll.get_pid();
             }
         }
     }
-
-    bool runningmaze= false;
-    float limit=10*(0.5f);
+    /*
+    g.pid_pitch.set_input_filter_all(10*(0.5f)-dist_forward);
+    target_pitch=100.0f*g.pid_pitch.get_pid();
+    //TODO REDO THIS SO IT ONLY CONTROLS WHEN VERY CLOSE
+    g.pid_roll.set_input_filter_all(10*(0.5f)-dist_right);
+    target_roll=100.0f*g.pid_roll.get_pid();
+     */
+    bool runningmaze= true;
+    float limit=10*(0.4f);
     if (runningmaze){
         if (dist_forward>limit){
             mstate=0;
         }else if (mstate==0){
             if (dist_left>limit){
-                mstate=2;
+                mstate=3;
             }else if (dist_right>limit){
                 mstate=1;
             }
         }else if (mstate==1){//Searching right
             if (dist_right<limit){
-                mstate=2;
+                mstate=3;
             }
-        }else if (mstate==2){//Searching left
+        }else if (mstate==3){//Searching left
             if (dist_left<limit){
                 mstate=1;
             }
         }
-        float mult=(mstate==1||mstate==0)?100.0f:-100.0f;
+        float mult=(mstate==0||mstate==3)?100.0f:-100.0f;
         if (mstate==0||mstate==2){
-            g.pid_pitch.set_input_filter_all(10*(0.5f)-data[mstate]);
+            g.pid_pitch.set_input_filter_all(10*(0.4f)-dists[mstate]);
             target_pitch=mult*g.pid_pitch.get_pid();
+            if (target_pitch>400){target_pitch=400;}
+            if (target_pitch<-400){target_pitch=-400;}
         }else{
-            g.pid_roll.set_input_filter_all(10*(0.5f)-data[mstate]);
+            g.pid_roll.set_input_filter_all(10*(0.4f)-dists[mstate]);
             target_roll=mult*g.pid_roll.get_pid();
+            if (target_roll>400){target_roll=400;}
+            if (target_roll<-400){target_roll=-400;}
         }
+    }
+    float slimit=10*(0.5f);
+    int numin=0;
+    for (int i = 0; i < 4; i++) {
+        if(i==1){
+            if (dists[i]>slimit){
+                numin++;
+            }
+        }else{
+            if (dists[i]<slimit){
+                numin++;
+            }
+        }
+    }
+    bool running=numin!=4;
+    if (!running){
+        const string stmsg3=(" BREAKING ");
+        gcs_send_text(MAV_SEVERITY_INFO,stmsg3.c_str());
     }
 
 
@@ -265,10 +296,15 @@ bool Copter::autonomous_controller(float &target_climb_rate, float &target_roll,
         }*/
         //string test="orient "+std::to_string(channel_yaw->get_control_in())+" pos : "+std::to_string(current_loc.lng)+", "+std::to_string(current_loc.lat);
         //char *word;
-        const string stmsg=("target roll : "+std::to_string(target_roll)+", pitch : "+std::to_string(target_pitch)+"\norient "+std::to_string(channel_yaw->get_control_in())+" pos : "+std::to_string(current_loc.lng)+", "+std::to_string(current_loc.lat));
+        const string stmsg=("target roll : "+std::to_string(target_roll)+", pitch : "+std::to_string(target_pitch));
+        const string stmsg1=(" state : "+std::to_string(mstate)+", running = "+std::string(running));
+        const string stmsg2=(" dists : "+std::to_string(dists[0])+", "+std::to_string(dists[1])+", "+std::to_string(dists[2])+", "+std::to_string(dists[3])+", ");
+
         gcs_send_text(MAV_SEVERITY_INFO,stmsg.c_str());
+        gcs_send_text(MAV_SEVERITY_INFO,stmsg1.c_str());
+        gcs_send_text(MAV_SEVERITY_INFO,stmsg2.c_str());
         counter=0;
     }
 
-    return true;
+    return running;
 }
