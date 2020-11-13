@@ -296,12 +296,12 @@ bool Copter::autonomous_controller(float &target_climb_rate, float &target_roll,
         }*/
         //string test="orient "+std::to_string(channel_yaw->get_control_in())+" pos : "+std::to_string(current_loc.lng)+", "+std::to_string(current_loc.lat);
         //char *word;
-        const string stmsg=("target roll : "+std::to_string(target_roll)+", pitch : "+std::to_string(target_pitch));
-        const string stmsg1=(" state : "+std::to_string(mstate)+", running = "+std::string(running));
-        const string stmsg2=(" dists : "+std::to_string(dists[0])+", "+std::to_string(dists[1])+", "+std::to_string(dists[2])+", "+std::to_string(dists[3])+", ");
-
-        gcs_send_text(MAV_SEVERITY_INFO,stmsg.c_str());
-        gcs_send_text(MAV_SEVERITY_INFO,stmsg1.c_str());
+        //const string stmsg=("target roll : "+std::to_string(target_roll)+", pitch : "+std::to_string(target_pitch));
+        //const string stmsg1=(" state : "+std::to_string(mstate)+", running = "+std::string(running));
+        const string stmsg2=(std::to_string(dists[0])+" "+std::to_string(dists[1])+" "+std::to_string(dists[2])+" "+std::to_string(dists[3]));
+//ok
+        //gcs_send_text(MAV_SEVERITY_INFO,stmsg.c_str());
+        //gcs_send_text(MAV_SEVERITY_INFO,stmsg1.c_str());
         gcs_send_text(MAV_SEVERITY_INFO,stmsg2.c_str());
         counter=0;
     }
